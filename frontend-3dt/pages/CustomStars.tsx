@@ -3,33 +3,52 @@ import * as THREE from 'three'
 import React, { useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 
+type CustomStarsProps= {
+  count?: number,
+  distance? : number
+}
 
-function CustomStars() {
+function random_gaussian() {
+  var u = 0, v = 0;
+  while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+  while(v === 0) v = Math.random();
+  return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+}
+
+const CustomStars = (props: CustomStarsProps) => {
     let group : any = useRef();
     let theta = 0;
-    // useFrame(() => {
-    //   if (group.current) {
+    useFrame(() => {
+      if (group.current) {
           
-    //     // Some things maybe shouldn't be declarative, we're in the render-loop here with full access to the instance
-    //     const r = 5 * Math.sin(THREE.MathUtils.degToRad((theta += 0.01)));
-    //     const s = Math.cos(THREE.MathUtils.degToRad(theta * 2));
-    //     group.current.rotation.set(r, r, r);
-    //     group.current.scale.set(s, s, s);
-    //   }
-    // });
+        // Some things maybe shouldn't be declarative, we're in the render-loop here with full access to the instance
+        const r = 10 * Math.sin(THREE.MathUtils.degToRad((theta += 0.01)));
+        const s = Math.cos(THREE.MathUtils.degToRad(theta * 2));
+        group.current.rotation.set(r, r, r);
+        group.current.scale.set(s, s, s);
+      }
+    });
   
+    const dist = props.distance! ? props.distance! : 300;
     const [geo, mat, coords] = useMemo(() => {
       const geo = new THREE.SphereBufferGeometry(1, 10, 10);
       const mat = new THREE.MeshBasicMaterial({
         color: new THREE.Color("yellow")
       });
-      const coords = new Array(1000)
+      const coords = new Array(props.count! ? props.count! : 2000) 
         .fill(null)
-        .map(i => [
-          Math.random() * 800 - 400,
-          Math.random() * 800 - 400,
-          Math.random() * 800 - 400
-        ]);
+        .map(i => {
+          // R is final distance away
+          const R = (Math.random() * 0.55 + 0.45) * dist; // a near-1 fraction of distance
+          let x = random_gaussian() * R;
+          let y = random_gaussian() * R;
+          let z = random_gaussian() * R;
+          let normalize = Math.sqrt(x*x + y*y + z*z)
+          x = x / normalize * R;
+          y = y / normalize * R;
+          z = z / normalize * R;
+          console.log(x, y, z)
+          return [x , y, z]});
       return [geo, mat, coords];
     }, []);
   

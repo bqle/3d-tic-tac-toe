@@ -1,8 +1,10 @@
 import * as THREE from 'three'
 import React, { useRef, useState } from 'react'
-import { Canvas, MeshProps, ThreeEvent, useFrame, Vector3 } from '@react-three/fiber'
+import { Canvas, MeshProps, ThreeEvent, useFrame, Vector3, extend } from '@react-three/fiber'
 import {GameStatus} from '../enums/GameStatus'
 import SnowFlake from './Snowflake'
+
+
 
 type SingleBoxProps = JSX.IntrinsicElements['mesh'] & {
   boxStatus? : GameStatus
@@ -21,6 +23,7 @@ const SingleBox = ({
 
     const hover = (e : ThreeEvent<PointerEvent>)=> {e.stopPropagation(); setHover(true)}
     const unhover = (e : ThreeEvent<PointerEvent>) => {e.stopPropagation(); setHover(false)}
+
 
     function handleClick(e: ThreeEvent<MouseEvent>) {
         e.stopPropagation();
