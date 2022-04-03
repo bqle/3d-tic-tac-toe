@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react'
 import { Canvas, useFrame, useThree, Vector3 } from '@react-three/fiber'
 import * as THREE from 'three'
 import { OrbitControls, Stars, Sky, Cloud, Backdrop } from '@react-three/drei'
@@ -22,9 +22,9 @@ function LargeBox(props: LargeBoxProps) {
   const mesh = useRef<THREE.Mesh>(null!)
   const [hovered, setHover] = useState(false)
   const [active, setActive] = useState(false)
-  const [gameStatus, setGameStatus] = useState([[[GameStatus.EMPTY, GameStatus.O, GameStatus.EMPTY],
-                                                 [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY],
-                                                 [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY]],
+  const [gameStatus, setGameStatus] = useState([[[GameStatus.X, GameStatus.O, GameStatus.X],
+                                                 [GameStatus.EMPTY, GameStatus.X, GameStatus.EMPTY],
+                                                 [GameStatus.X, GameStatus.X, GameStatus.EMPTY]],
                                                 [[GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY],
                                                  [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY],
                                                  [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY]],
@@ -32,16 +32,8 @@ function LargeBox(props: LargeBoxProps) {
                                                  [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY],
                                                  [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY]]
                                         ]);
-  const [highlightStatus, setHighlightStatus] = useState([[[false, false, false],
-                                                            [false, false, false],
-                                                            [false, false, false]],
-                                                          [[false, false, false],
-                                                            [false, false, false],
-                                                            [false, false, false]],
-                                                          [[false, false, false],
-                                                            [false, false, false],
-                                                            [false, false, false]]
-                                                        ]);
+  const [highlightCoord, setHighlightCoord] = useState([0, 0, 2]);
+
 
   // can be improved
   const arrayOfGeoms = useMemo(() => {
@@ -51,18 +43,61 @@ function LargeBox(props: LargeBoxProps) {
     }
     return array}, [])
 
-  function updateHighlightArray(i : number, j: number, k: number) {
-    let newHighlightStatus = [...highlightStatus]
-    for (let a = 0 ; a < 3; a++) {
-      for (let b = 0 ;b < 3 ; b++) {
-        for (let c = 0 ; c < 3; c++) {
-          newHighlightStatus[a][b][c] = false
-        }
+  const handleUserKeyPress = useCallback(event => {
+    const code = event.code;
+    var i = highlightCoord[0];
+    var j = highlightCoord[1];
+    var k = highlightCoord[2];
+    console.log(i, j, k)
+    if (code === 'ArrowLeft') { // left arrow - decrease x
+      if (i > 0) {
+        setHighlightCoord([i -1, j, k])
+      }
+    } else if (code === 'ArrowUp') { // up arrow -  increase y
+      if (j < 2) {
+        setHighlightCoord([i, j + 1, k])
+      }
+    } else if (code === 'ArrowRight') { // right arrow - increase x
+      if (i < 2) {
+        setHighlightCoord([i + 1, j, k])
+      }
+    } else if (code === 'ArrowDown') { // down arrow - decrease y
+      if (j > 0) {
+        setHighlightCoord([i , j - 1, k])
+      }
+    } else if (code === 'KeyQ') { // q - increase z
+      if (k < 2) {
+        setHighlightCoord([i , j, k + 1])
+      }
+    } else if (code === 'KeyE') { // e - decrease z
+      if (k > 0) {
+        setHighlightCoord([i , j, k - 1])
       }
     }
-    newHighlightStatus[i][j][k] = true
-    setHighlightStatus(newHighlightStatus)
+  }, [highlightCoord])
+  
+  useEffect(() => {
+    console.log('added keydown');
+    window.addEventListener('keydown', handleUserKeyPress);
+    window.addEventListener('dblclick', clickCenter);
+    return () => {
+      window.removeEventListener('keydown', handleUserKeyPress);
+      window.removeEventListener('dblclick', clickCenter);
+    };
+  }, [handleUserKeyPress, clickCenter])
+  
+
+  function updateHighlightCoord(i : number, j: number, k: number) {
+    console.log(i, j, k);
+    setHighlightCoord([i, j, k]);
   }
+
+  function clickCenter() {
+    console.log(1, 1, 1);
+    setHighlightCoord([1, 1, 1]);
+  }
+  
+  const staticCube = new Array(3).fill(0).map(() => new Array(3).fill(0).map(() => new Array(3).fill(0)))
   return (
     <mesh rotation={[deg2rad(0), deg2rad(0), deg2rad(0)]}
       {...props}
@@ -72,21 +107,24 @@ function LargeBox(props: LargeBoxProps) {
       >
       {arrayOfGeoms.map(
         (x, i) => (
-                <lineSegments position={[Math.floor(i/9) - boxSize * shiftFactor, Math.floor(i %9 / 3) - boxSize * shiftFactor, (i%3) - boxSize * shiftFactor]}>
+                <lineSegments key={i} position={[Math.floor(i/9) - boxSize * shiftFactor, Math.floor(i %9 / 3) - boxSize * shiftFactor, (i%3) - boxSize * shiftFactor]}>
                   <edgesGeometry attach="geometry" args={[x]}></edgesGeometry>
                   <lineBasicMaterial color="#debd3c" attach="material" />
                 </lineSegments>
               )
         )}
-        {highlightStatus.map(
+        {staticCube.map(
         (iValue, i) => (
           iValue.map(
             (jValue, j) => (
               jValue.map(
-                (highlightStatus: boolean, k) => (
+                (_, k) => (
                   <SingleBox position={[i - boxSize * shiftFactor, j - boxSize * shiftFactor, k - boxSize * shiftFactor]}
-                    highlightStatus = {highlightStatus}
-                    updateHighlightArray = {() => updateHighlightArray(i, j, k)}
+                    highlightStatus = {(i === highlightCoord[0] 
+                      && j === highlightCoord[1] 
+                      && k === highlightCoord[2]) ? true: false}
+                    boxStatus = {gameStatus[i][j][k]}
+                    updateHighlightCoord = {() => updateHighlightCoord(i, j, k)}
                   ></SingleBox>
                 )
                 )
@@ -103,10 +141,8 @@ function LargeBox(props: LargeBoxProps) {
 
 
 const Scene = () => {
-  
-
   return (
-    <Canvas camera={{position: [0, 0, 5]}}
+    <Canvas camera={{position: [0, 0, 10]}}
       style={{position: 'absolute',
               width: '100%',
               height: '100%'
@@ -114,7 +150,9 @@ const Scene = () => {
     >
       <color attach="background" args={["black"]}></color>
       <OrbitControls target={[0, 0, 0]} />
-      <Stars radius={100} depth={1} count={5000} factor={4} saturation={0} fade /> 
+      <Stars radius={100} depth={1} count={5000} factor={4} saturation={0} 
+        // fade
+      /> 
       {/* <CustomStars ></CustomStars> */}
       {/* <Cloud /> */}
       {/* <Sky distance={450000} sunPosition={[0, 1, 0]} inclination={0} azimuth={0.5} /> */}
@@ -125,8 +163,7 @@ const Scene = () => {
         <sphereGeometry attach="geometry" args={[1000, 16, 16]}/>
         <meshStandardMaterial attach="material"
                     color={"black"}
-                    transparent={true}
-                    opacity={0.4}
+      
                     />
       </mesh>
       <LargeBox />
