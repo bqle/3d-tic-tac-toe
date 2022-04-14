@@ -1,15 +1,12 @@
-import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react'
-import { Canvas, useFrame, useThree, Vector3, extend } from '@react-three/fiber'
-import * as THREE from 'three'
-import { OrbitControls, Stars, Sky, Cloud, Backdrop } from '@react-three/drei'
+import React from 'react'
+import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
 import LargeBox from '../components/LargeBox'
 import CustomStars from '../components/CustomStars'
 import { Text } from '@react-three/drei'
 import fonts from '../public/fonts.js'
-import constants from '../public/constants.js'
-import HelpIcon from '../components/Help/HelpIcon'
+import {colors} from '../public/constants.js'
 import HelpMenu from '../components/Help/HelpMenu'
-import { MenuActiveContext } from '../context/context'
 
 
 const Scene = () => {
@@ -26,12 +23,12 @@ const Scene = () => {
       >
         <color attach="background" args={["black"]}></color>
         <group>
-          <Text font={fonts.Philosopher} color={constants.brightOrange} anchorX='center' anchorY='middle'
+          <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
             position={[0, 5, 0]}
             fontSize={2} >
               Welcome to
           </Text>
-          <Text font={fonts.Philosopher} color={constants.brightOrange} anchorX='center' anchorY='middle'
+          <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
             position={[0, 3, 0]}
             fontSize={2} >
               3D tic-tac-toe!

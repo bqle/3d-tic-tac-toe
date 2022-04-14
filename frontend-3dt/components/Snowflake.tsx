@@ -1,9 +1,7 @@
 import * as THREE from 'three'
-import React, { useRef, useState } from 'react'
-import { Canvas, MeshProps, ThreeEvent, useFrame, Vector3 } from '@react-three/fiber'
-import {GameStatus} from '../enums/GameStatus'
+import React, { useRef } from 'react'
+import { MeshProps, useFrame } from '@react-three/fiber'
 import { Line } from '@react-three/drei'
-import { useSpring } from "@react-spring/three"
 
 const lineWidth = 2
 const low = -0.3
