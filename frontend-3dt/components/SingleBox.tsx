@@ -1,9 +1,9 @@
 import * as THREE from 'three'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Canvas, MeshProps, ThreeEvent, useFrame, Vector3, extend } from '@react-three/fiber'
 import {GameStatus} from '../enums/GameStatus'
 import SnowFlake from './Snowflake'
-
+import {useSpring, config, animated} from '@react-spring/three'
 
 
 type SingleBoxProps = JSX.IntrinsicElements['mesh'] & {
@@ -24,18 +24,38 @@ const SingleBox = ({
     const hover = (e : ThreeEvent<PointerEvent>)=> {e.stopPropagation(); setHover(true)}
     const unhover = (e : ThreeEvent<PointerEvent>) => {e.stopPropagation(); setHover(false)}
 
+    const {scale} = useSpring({
+      scale: hovered ? 1 : 0,
+      config: config.wobbly,
+    })
+
 
     function handleClick(e: ThreeEvent<MouseEvent>) {
         e.stopPropagation();
         if (updateHighlightCoord) {updateHighlightCoord!()}
+        setHover(true)
     }
+
+    useEffect(() => {
+      const handleEnter = (e: KeyboardEvent) => {
+        if (e.code === "Enter" && highlightStatus!) {
+          console.log("single box", meshProps.position!)
+          setHover(true)
+        }
+      }
+
+      window.addEventListener('keydown', handleEnter);
+      return () => {
+        window.removeEventListener('keydown', handleEnter);
+      };
+    })
 
     return (
       <group position = {meshProps.position!}>
         <mesh 
-          // position={meshProps.position!}
-          onPointerOver={hover}
-          onPointerOut={unhover}
+          
+          // onPointerOver={hover}
+          // onPointerOut={unhover}
           onClick={handleClick}
           >
           <boxGeometry attach='geometry' />
@@ -47,20 +67,17 @@ const SingleBox = ({
         </mesh>
         {
           boxStatus! === GameStatus.O &&
-          <mesh
-            // position={meshProps.position!}
+          <animated.mesh
+            scale={scale}
             >
-            <sphereGeometry attach='geometry' args={[0.4, 30, 30]} />
+            <sphereGeometry attach='geometry' args={[0.25, 30, 30]} />
             <meshStandardMaterial attach="material"
-                      color={'#debd3c'}
-                      // transparent={true}
-                      // opacity={0.7}
-                      />
-          </mesh>
+                      color={'#debd3c'}/>
+          </animated.mesh>
         }
         {
           boxStatus! === GameStatus.X &&
-          <SnowFlake />
+          <animated.mesh scale={scale}><SnowFlake /></animated.mesh>
         }
       </group>
     )

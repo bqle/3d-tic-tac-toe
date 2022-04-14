@@ -19,9 +19,11 @@ function LargeBox(props: LargeBoxProps) {
   const mesh = useRef<THREE.Mesh>(null!)
   const [hovered, setHover] = useState(false)
   const [active, setActive] = useState(false)
-  const [gameStatus, setGameStatus] = useState([[[GameStatus.X, GameStatus.O, GameStatus.X],
-                                                 [GameStatus.EMPTY, GameStatus.X, GameStatus.EMPTY],
-                                                 [GameStatus.X, GameStatus.X, GameStatus.EMPTY]],
+  const [nextTile, setNextTile] = useState(GameStatus.X)
+
+  const [gameStatus, setGameStatus] = useState([[[GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY],
+                                                 [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY],
+                                                 [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY]],
                                                 [[GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY],
                                                  [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY],
                                                  [GameStatus.EMPTY, GameStatus.EMPTY, GameStatus.EMPTY]],
@@ -45,7 +47,6 @@ function LargeBox(props: LargeBoxProps) {
     var i = highlightCoord[0];
     var j = highlightCoord[1];
     var k = highlightCoord[2];
-    console.log(i, j, k)
     if (code === 'ArrowLeft') { // left arrow - decrease x
       if (i > 0) {
         setHighlightCoord([i -1, j, k])
@@ -70,9 +71,33 @@ function LargeBox(props: LargeBoxProps) {
       if (k > 0) {
         setHighlightCoord([i , j, k - 1])
       }
+    } else if (code === 'Enter') {
+      console.log('ENTER!')
+      let gameStatusClone = new Array(3).fill(0).map(() => new Array(3).fill(0).map(() => new Array(3).fill(0)))
+      for (let i = 0 ; i < 3; i++) {
+        for (let j = 0 ; j < 3; j++) {
+          for (let k = 0 ; k < 3 ; k++) {
+            gameStatusClone[i][j][k] = gameStatus[i][j][k];
+          }
+        }
+      }
+      if (gameStatusClone[i][j][k] === GameStatus.EMPTY) {
+        console.log('EMPTY!')
+        gameStatusClone[i][j][k] = nextTile
+        if (nextTile === GameStatus.O) {
+          setNextTile(GameStatus.X)
+        } else {
+          setNextTile(GameStatus.O)  
+        }
+        setGameStatus(gameStatusClone)
+      }
     }
-  }, [highlightCoord])
+  }, [highlightCoord, gameStatus, nextTile])
   
+  const clickCenter = useCallback(event => {
+    setHighlightCoord([1, 1, 1]);
+  }, [])
+
   useEffect(() => {
     console.log('added keydown');
     window.addEventListener('keydown', handleUserKeyPress);
@@ -82,16 +107,11 @@ function LargeBox(props: LargeBoxProps) {
       window.removeEventListener('dblclick', clickCenter);
     };
   }, [handleUserKeyPress, clickCenter])
-  
+
 
   function updateHighlightCoord(i : number, j: number, k: number) {
     console.log(i, j, k);
     setHighlightCoord([i, j, k]);
-  }
-
-  function clickCenter() {
-    console.log(1, 1, 1);
-    setHighlightCoord([1, 1, 1]);
   }
   
   const staticCube = new Array(3).fill(0).map(() => new Array(3).fill(0).map(() => new Array(3).fill(0)))
@@ -116,7 +136,7 @@ function LargeBox(props: LargeBoxProps) {
             (jValue, j) => (
               jValue.map(
                 (_, k) => (
-                  <SingleBox position={[i - boxSize * shiftFactor, j - boxSize * shiftFactor, k - boxSize * shiftFactor]}
+                  <SingleBox key={i + ' ' + j + ' ' + k} position={[i - boxSize * shiftFactor, j - boxSize * shiftFactor, k - boxSize * shiftFactor]}
                     highlightStatus = {(i === highlightCoord[0] 
                       && j === highlightCoord[1] 
                       && k === highlightCoord[2]) ? true: false}

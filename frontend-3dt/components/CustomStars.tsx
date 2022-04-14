@@ -2,6 +2,7 @@
 import * as THREE from 'three'
 import React, { useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
+import {lightYellow} from '../public/constants'
 
 type CustomStarsProps= {
   count?: number,
@@ -31,9 +32,9 @@ const CustomStars = (props: CustomStarsProps) => {
   
     const dist = props.distance! ? props.distance! : 300;
     const [geo, mat, coords] = useMemo(() => {
-      const geo = new THREE.SphereBufferGeometry(1, 10, 10);
+      const geo = new THREE.SphereBufferGeometry(0.7, 10, 10);
       const mat = new THREE.MeshBasicMaterial({
-        color: new THREE.Color("yellow")
+        color: new THREE.Color(lightYellow)
       });
       const coords = new Array(props.count! ? props.count! : 2000) 
         .fill(null)
@@ -47,7 +48,6 @@ const CustomStars = (props: CustomStarsProps) => {
           x = x / normalize * R;
           y = y / normalize * R;
           z = z / normalize * R;
-          console.log(x, y, z)
           return [x , y, z]});
       return [geo, mat, coords];
     }, []);
