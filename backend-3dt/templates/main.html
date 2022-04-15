@@ -8,16 +8,35 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
 	<script type="text/javascript" charset="utf-8">
 		var socket = io({autoConnect: true});
+    var username = ''
+    var room = ''
+  
 		socket.on('connect', function() {
-			socket.emit('my event', {data: 'I\'m connected!'});
-      
+			// socket.emit('my event', {data: 'I\'m connected!'});
+      console.log('I am connected')
+      socket.on('disconnect', () => {
+        io.sockets.emit('leave', {'username': username, 'room': room})
+      })
 		});
     // setTimeout('', 5000)
 
-    socket.emit('join', {'username': 'cool', 'room': 4})
+    socket.on('connect-response', function(message) {
+      console.log(message);
+      username = message
+      socket.emit('join', {'username': username})
 
-  
+    })
 
+    socket.on('join-response', function(message) {
+      console.log('a new user has joined')
+      console.log(message)
+    })
+
+    socket.on('move-played', function(message) {
+      console.log(message)
+    })
+
+    socket.emit('play-move', {'i': 0, 'j': 1, 'k': 2, 'tile': 'X'})
 
 	</script>
   </head>
