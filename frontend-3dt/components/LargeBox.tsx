@@ -37,7 +37,6 @@ function LargeBox(props: LargeBoxProps) {
   const [highlightCoord, setHighlightCoord] = useState([0, 0, 2]);
   const {socket, tile, joinRoom, playMove, leaveRoom} = useContext(SocketContext)
 
-  console.log('player tile 2', tile)
   // can be improved
   const arrayOfGeoms = useMemo(() => {
     let array = new Array(27);
@@ -124,9 +123,11 @@ function LargeBox(props: LargeBoxProps) {
       let j = message['j']
       let k = message['k']
       let newTile = message['tile']
-      console.log(i, j, k, tile)
+      console.log(i, j, k, newTile)
+      console.log(nextTile.valueOf())
+      console.log(gameStatus[i][j][k])
       if (nextTile.valueOf() === newTile && gameStatus[i][j][k] === GameStatus.EMPTY) { // tile is indeed played by opponent
-        console.log('set tile!')
+        console.log('set tile from other!')
         let clone = cloneGameStatus()
         clone[i][j][k] = newTile
         setGameStatus(clone)

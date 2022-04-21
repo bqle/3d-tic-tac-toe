@@ -84,7 +84,9 @@ def on_join_room(data=None):
 		rooms[room] = {}
 		rooms[room][sid] = 'X'
 		room_info = get_room_info(room)
-		emit('join-response', {'username': usernames[sid],'room': room, 'tile': 'X', 'roomInfo': room_info}, room=room, broadcast=True)
+		# emit join-response to the joiner
+		emit('join-response', {'username': usernames[sid],'room': room, 'tile': 'X', 'roomInfo': room_info}, room=request.sid)
+
 	elif len(rooms[room]) == 1:
 		print('room has one person')
 		first_person = list(rooms[room].keys())[0]
@@ -99,7 +101,10 @@ def on_join_room(data=None):
 		print('sockets in a room')
 		for sid in rooms[room]:
 			print(sid, rooms[room][sid])
-		emit('join-response', {'username': usernames[sid], 'room': room, 'tile': choice, 'roomInfo': room_info}, room=room, broadcast=True)
+		# emit join-response to the joiner
+		emit('join-response', {'username': usernames[sid], 'room': room, 'tile': choice, 'roomInfo': room_info}, room=request.sid)
+		# emit another-join-response to others in the room
+		emit('another-join-response', {'username': usernames[sid], 'room': room, 'tile': choice, 'roomInfo': room_info}, room=room)
 
 	
 

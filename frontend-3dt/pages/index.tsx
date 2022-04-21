@@ -47,7 +47,7 @@ const Scene = () => {
     })
 
     newSocket.on('join-response', function(message) {
-      console.log('a new user has joined')
+      console.log('you have joined')
       console.log('new info', message)
       console.log('current info', room, tile)
       if (room === null) { // joining an empty romo
@@ -58,8 +58,12 @@ const Scene = () => {
       } 
     })
 
-    newSocket.on('move-played', function(message) {
-      console.log(message)
+    newSocket.on('another-join-response', function(message) {
+      console.log('another has joined')
+      console.log('new info', message)
+      console.log('current info', room, tile) 
+      setRoomInfo(message['roomInfo'])
+
     })
 
     setSocket(newSocket);
