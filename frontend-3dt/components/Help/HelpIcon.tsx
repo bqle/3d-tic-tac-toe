@@ -3,7 +3,7 @@ import Image from "next/image"
 import { useEffect } from "react"
 import questionMarkImg from '../../public/question_mark.png'
 import { useCallback, useContext } from "react"
-import { MenuActiveContext } from "../../context/context"
+import { MenuActiveContext } from "../../context/MenuActiveContext"
 
 const HelpIcon = () => {
 

@@ -1,7 +1,7 @@
 enum GameStatus {
-    X = 1,
-    O = 2,
-    EMPTY = 3,
+    X = 'X',
+    O = 'O',
+    EMPTY = 'EMPTY',
     
 }
 

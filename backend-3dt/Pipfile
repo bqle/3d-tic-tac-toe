@@ -5,7 +5,9 @@ name = "pypi"
 
 [packages]
 flask = "*"
-flask-socketio = "*"
+flask-socketio = "==4.3.2"
+werkzeug = "==2.0.3"
+flask-cors = "*"
 
 [dev-packages]
 

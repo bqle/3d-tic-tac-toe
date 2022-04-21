@@ -1,9 +1,6 @@
 
-import Image from "next/image"
-import { useEffect } from "react"
-import { useCallback } from "react"
 import HelpIcon from "./HelpIcon"
-import { MenuActiveContext } from "../../context/context"
+import { MenuActiveContext } from "../../context/MenuActiveContext"
 import { useState } from "react"
 import HelpInstructions from "./HelpInstructions"
 
@@ -14,10 +11,9 @@ const HelpMenu = () => {
     console.log('pressed', menuActive); 
     setMenuActive(!menuActive);
   }
-  
 
   return (
-      <MenuActiveContext.Provider value ={{flipMenuActive}}>
+      <MenuActiveContext.Provider value ={{flipMenuActive: flipMenuActive}}>
           <HelpIcon></HelpIcon>
           {menuActive && 
           <HelpInstructions />

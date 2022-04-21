@@ -1,5 +1,5 @@
 
-import { MenuActiveContext } from "../../context/context" 
+import { MenuActiveContext } from "../../context/MenuActiveContext" 
 import { useContext } from "react"
 import Image from "next/image"
 import closeButton from "../../public/x_button.png"

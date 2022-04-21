@@ -24,7 +24,6 @@
       console.log(message);
       username = message
       socket.emit('join', {'username': username})
-
     })
 
     socket.on('join-response', function(message) {

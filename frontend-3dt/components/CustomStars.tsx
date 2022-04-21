@@ -21,9 +21,7 @@ const CustomStars = (props: CustomStarsProps) => {
     let theta = 0;
     useFrame(() => {
       if (group.current) {
-          
-        // Some things maybe shouldn't be declarative, we're in the render-loop here with full access to the instance
-        const r = 10 * Math.sin(THREE.MathUtils.degToRad((theta += 0.01)));
+        const r = 5 * Math.sin(THREE.MathUtils.degToRad((theta += 0.01)));
         const s = Math.cos(THREE.MathUtils.degToRad(theta * 2));
         group.current.rotation.set(r, r, r);
         group.current.scale.set(s, s, s);
