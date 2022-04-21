@@ -4,6 +4,7 @@ import SingleBox from './SingleBox'
 import {GameStatus} from '../enums/GameStatus'
 import { SocketContext } from '../context/SocketContext';
 import { Socket } from "socket.io-client"
+import { _roots } from '@react-three/fiber';
 
 
 const deg2rad = (degrees:number) => degrees * (Math.PI / 180);
@@ -44,6 +45,22 @@ function LargeBox(props: LargeBoxProps) {
       array[i] = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
     }
     return array}, [])
+
+  const cloneGameStatus = useCallback(() => {
+    let clone = new Array(3).fill(0).map(() => new Array(3).fill(0).map(() => new Array(3).fill(0)))
+    for (let i = 0 ; i < 3; i++) {
+      for (let j = 0 ; j < 3; j++) {
+        for (let k = 0 ; k < 3 ; k++) {
+          clone[i][j][k] = gameStatus[i][j][k];
+        }
+      }
+    }
+    return clone;
+  }, [gameStatus])
+
+  const clickCenter = useCallback((event) => {
+    setHighlightCoord([1, 1, 1]);
+  }, [])
 
   const handleUserKeyPress = useCallback(event => {
     const code = event.code;
@@ -97,27 +114,11 @@ function LargeBox(props: LargeBoxProps) {
       leaveRoom()
     } else if (code === 'KeyC') {
     }
-  }, [highlightCoord, gameStatus, nextTile, leaveRoom, playMove])
-  
-  const cloneGameStatus = function() {
-    let clone = new Array(3).fill(0).map(() => new Array(3).fill(0).map(() => new Array(3).fill(0)))
-    for (let i = 0 ; i < 3; i++) {
-      for (let j = 0 ; j < 3; j++) {
-        for (let k = 0 ; k < 3 ; k++) {
-          clone[i][j][k] = gameStatus[i][j][k];
-        }
-      }
-    }
-    return clone;
-  }
+  }, [highlightCoord, gameStatus, nextTile, leaveRoom, playMove, cloneGameStatus])
 
-  const clickCenter = useCallback(event => {
-    setHighlightCoord([1, 1, 1]);
-  }, [])
 
   useEffect(() => {
     socket?.on('move-played', function(message) {
-      
       console.log(message);
       let i = message['i']
       let j = message['j']
@@ -129,7 +130,10 @@ function LargeBox(props: LargeBoxProps) {
       if (nextTile.valueOf() === newTile && gameStatus[i][j][k] === GameStatus.EMPTY) { // tile is indeed played by opponent
         console.log('set tile from other!')
         let clone = cloneGameStatus()
-        clone[i][j][k] = newTile
+        console.log('old', clone)
+        clone[i][j][k] = nextTile;
+        console.log('new', clone)
+        
         setGameStatus(clone)
         let next = nextTile === GameStatus.O ? GameStatus.X : GameStatus.O;
         setNextTile(next)
@@ -144,7 +148,7 @@ function LargeBox(props: LargeBoxProps) {
       window.removeEventListener('dblclick', clickCenter);
       socket?.off('move-played');
     };
-  }, [handleUserKeyPress, clickCenter, joinRoom, socket])
+  }, [gameStatus, nextTile, setGameStatus, setNextTile, handleUserKeyPress, clickCenter, joinRoom, socket, cloneGameStatus])
 
 
   function updateHighlightCoord(i : number, j: number, k: number) {

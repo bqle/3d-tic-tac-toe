@@ -161,7 +161,7 @@ def on_play_move(data):
 	"""
 	print('play move')
 	room = get_room(request.sid)
-	emit('move-played', data, room=room)
+	emit('move-played', data, room=room, skip_sid=request.sid)
 
 
 

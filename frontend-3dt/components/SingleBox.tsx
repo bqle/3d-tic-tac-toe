@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, MeshProps, ThreeEvent, useFrame, Vector3, extend } from '@react-three/fiber'
 import {GameStatus} from '../enums/GameStatus'
 import SnowFlake from './Snowflake'
@@ -20,6 +20,7 @@ const SingleBox = ({
   ...meshProps
 }:SingleBoxProps) => {
     const [hovered, setHover] = useState(false)
+    const [status, setBoxStatus] = useState(GameStatus.EMPTY)
 
     const hover = (e : ThreeEvent<PointerEvent>)=> {e.stopPropagation(); setHover(true)}
     const unhover = (e : ThreeEvent<PointerEvent>) => {e.stopPropagation(); setHover(false)}
@@ -33,8 +34,13 @@ const SingleBox = ({
     function handleClick(e: ThreeEvent<MouseEvent>) {
         e.stopPropagation();
         if (updateHighlightCoord) {updateHighlightCoord!()}
-        setHover(true)
     }
+
+    useMemo(() => {
+      if (boxStatus != status) {
+        setHover(true)
+      }
+    }, [boxStatus, status])
 
     useEffect(() => {
       const handleEnter = (e: KeyboardEvent) => {
@@ -43,12 +49,12 @@ const SingleBox = ({
           setHover(true)
         }
       }
-
       window.addEventListener('keydown', handleEnter);
       return () => {
         window.removeEventListener('keydown', handleEnter);
       };
     })
+    
 
     return (
       <group position = {meshProps.position!}>

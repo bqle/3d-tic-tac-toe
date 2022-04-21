@@ -109,7 +109,7 @@ const Scene = () => {
                   roomInfo={roomInfo}
         />
       </SocketContext.Provider>
-      <Canvas camera={{position: [0, 0, 25]}}
+      <Canvas camera={{position: [0, 0, 11]}}
         style={{position: 'absolute',
                 width: '100%',
                 height: '100%'
