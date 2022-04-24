@@ -125,12 +125,22 @@ const Scene = () => {
           </group>
         }
         {
-          (gameStatus == GameStatus.X || gameStatus == GameStatus.O) &&
+          gameStatus == GameStatus.X &&
           <group>
             <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
               position={[0, 5, 0]}
               fontSize={2} >
                 X has won
+            </Text>
+          </group>
+        }
+        {
+          gameStatus == GameStatus.O &&
+          <group>
+            <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+              position={[0, 5, 0]}
+              fontSize={2} >
+                O has won
             </Text>
           </group>
         }

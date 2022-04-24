@@ -125,7 +125,6 @@ function LargeBox(props: LargeBoxProps) {
       
 
       if (checkRow(2, j, 0, 1, j, 1, 0, j, 2)) {
-        console.log('FOUND HERE!')
         victor = gameState[2][j][0];
       }
     }
@@ -226,7 +225,7 @@ function LargeBox(props: LargeBoxProps) {
     } else if (code === 'KeyT') {
       leaveRoom()
     } else if (code === 'KeyC') {
-      
+
     }
   }, [highlightCoord, gameState, nextTile, leaveRoom, playMove, cloneGameState, checkGameStatus])
 
