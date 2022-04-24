@@ -226,6 +226,7 @@ function LargeBox(props: LargeBoxProps) {
     } else if (code === 'KeyT') {
       leaveRoom()
     } else if (code === 'KeyC') {
+      
     }
   }, [highlightCoord, gameState, nextTile, leaveRoom, playMove, cloneGameState, checkGameStatus])
 

@@ -116,7 +116,7 @@ def get_room(sid):
 	else : 
 		return None	
 
-def leave_room(sid):
+def user_leave_room(sid):
 	# return bool : whether the room was deleted or not
 	room = get_room(sid)
 	if (room != None and room in rooms):
@@ -132,8 +132,9 @@ def leave_room(sid):
 def on_leave_room():
 	sid = request.sid
 	room = get_room(sid)
+	leave_room(room, sid)
 	if (room is not None):
-		room_deleted = leave_room(sid)
+		room_deleted = user_leave_room(sid)
 		if (not room_deleted): 
 			emit('user-left', {'roomInfo': get_room_info(room)}, room=room)
 	
@@ -147,7 +148,7 @@ def on_disconnect(data = None):
 	usernames.pop(sid)
 	room = get_room(sid)
 	if (room is not None):
-		room_deleted = leave_room(sid)
+		room_deleted = user_leave_room(sid)
 		if (not room_deleted): 
 			emit('user-left', usernames[sid], room=room)
 

@@ -4,8 +4,8 @@ import { MeshProps, useFrame } from '@react-three/fiber'
 import { Line } from '@react-three/drei'
 
 const lineWidth = 2
-const low = -0.3
-const high = 0.3
+const low = -0.25
+const high = 0.25
 const color = '#955342'
 
 const SnowFlake = (meshProps:MeshProps) => {
