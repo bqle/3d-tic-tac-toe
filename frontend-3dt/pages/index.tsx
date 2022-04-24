@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import LargeBox from '../components/LargeBox'
@@ -11,6 +11,8 @@ import RoomMenu from '../components/Room/RoomMenu'
 import io from 'socket.io-client'
 import { Socket } from 'socket.io-client'
 import { SocketContext } from "../context/SocketContext"
+import {SquareStatus} from "../enums/SquareStatus"
+import {GameStatus} from "../enums/GameStatus"
 
 
 
@@ -21,6 +23,8 @@ const Scene = () => {
   const [room, setRoom] = useState<null | string>(null);
   const [roomInfo, setRoomInfo] = useState<null | {}>(null);
   const [tile, setTile] = useState<null | string>(null); // tile that this player can place
+  // gameMessage options
+  const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.MENU)
 
   useEffect(() => {
     const newSocket = io(`${window.location.hostname}:5000`, 
@@ -48,10 +52,7 @@ const Scene = () => {
 
     newSocket.on('join-response', function(message) {
       console.log('you have joined')
-      console.log('new info', message)
-      console.log('current info', room, tile)
       if (room === null) { // joining an empty romo
-        console.log('chaging game statsu')
         setRoom(message['room'])
         setTile(message['tile'])
         setRoomInfo(message['roomInfo'])
@@ -60,8 +61,6 @@ const Scene = () => {
 
     newSocket.on('another-join-response', function(message) {
       console.log('another has joined')
-      console.log('new info', message)
-      console.log('current info', room, tile) 
       setRoomInfo(message['roomInfo'])
 
     })
@@ -71,20 +70,16 @@ const Scene = () => {
     return () => {newSocket.close();}
   }, [])
 
-  const socketJoinRoom = () => {
-    if ('room' != null) {
-      console.log('room is not empty')
-      socket?.emit('join', {'username': username, 'room': room})
+  const socketJoinRoom = (newRoom? : string) => {
+    if (newRoom != null) {
+      socket?.emit('join', {'username': username, 'room': newRoom})
     } else {
-      console.log('room is empty')
       socket?.emit('join', {'username': username})
     }
     console.log('joined room')
-
   }
 
   const socketPlayMove = (i: number, j: number, k: number, tile: string) => {
-    console.log(room, username, socket== null)
     socket?.emit('play-move', {'i': i, 'j': j, 'k': k, 'tile': tile})
   }
 
@@ -92,7 +87,6 @@ const Scene = () => {
     setRoom(null)
     setTile(null)
     setRoomInfo(null)
-    console.log(room)
     socket?.emit('leave-room')
   }
 
@@ -109,25 +103,47 @@ const Scene = () => {
                   roomInfo={roomInfo}
         />
       </SocketContext.Provider>
-      <Canvas camera={{position: [0, 0, 11]}}
+      <Canvas camera={{position: [0, 0, 15]}}
         style={{position: 'absolute',
                 width: '100%',
                 height: '100%'
               }}
       >
         <color attach="background" args={["black"]}></color>
-        <group>
-          <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
-            position={[0, 5, 0]}
-            fontSize={2} >
-              Welcome to
-          </Text>
-          <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
-            position={[0, 3, 0]}
-            fontSize={2} >
-              3D tic-tac-toe!
-          </Text>
-        </group>
+        {gameStatus == GameStatus.MENU &&
+          <group>
+            <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+              position={[0, 5, 0]}
+              fontSize={2} >
+                Welcome to
+            </Text>
+            <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+              position={[0, 3, 0]}
+              fontSize={2} >
+                3D tic-tac-toe!
+            </Text>
+          </group>
+        }
+        {
+          (gameStatus == GameStatus.X || gameStatus == GameStatus.O) &&
+          <group>
+            <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+              position={[0, 5, 0]}
+              fontSize={2} >
+                X has won
+            </Text>
+          </group>
+        }
+        {
+          gameStatus == GameStatus.DRAW &&
+          <group>
+            <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+              position={[0, 5, 0]}
+              fontSize={2} >
+                Game is drawn!
+            </Text>
+          </group>
+        }
         <OrbitControls target={[0, 0, 0]} />
         {/* <Stars radius={100} depth={1} count={5000} factor={4} saturation={0}
           // fade
@@ -151,7 +167,7 @@ const Scene = () => {
           joinRoom: socketJoinRoom, 
           playMove: socketPlayMove,
           leaveRoom: socketLeaveRoom}}>
-          <LargeBox />
+          <LargeBox changeGameStatus={(status: GameStatus) => {setGameStatus(status);}}/>
         </SocketContext.Provider>
       </Canvas>
     </div>

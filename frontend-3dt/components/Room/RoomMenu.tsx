@@ -1,6 +1,6 @@
 
-import { useContext } from "react"
-	import { Socket } from "socket.io-client"
+import { useContext, useState } from "react"
+import { Socket } from "socket.io-client"
 import {SocketContext} from '../../context/SocketContext';
 
 type RoomMenuProps = {
@@ -11,6 +11,7 @@ type RoomMenuProps = {
 }
 
 const RoomMenu = (props: RoomMenuProps) => {
+	const [roomInput, setRoomInput] = useState('')
 
 	const {joinRoom, playMove, leaveRoom} = useContext(SocketContext)
 
@@ -57,8 +58,17 @@ const RoomMenu = (props: RoomMenuProps) => {
 					style={{
 						width: '100%'
 					}}
+					onInput={(e) => {
+						setRoomInput((e.target as HTMLTextAreaElement).value);
+						console.log((e.target as HTMLTextAreaElement).value);
+					}}
 				/>
-				<button>
+				<button style={{
+					marginBottom: '10px'
+				}} onClick={() => {
+					console.log('roomInput', roomInput)
+					joinRoom(roomInput)
+				}}>
 					Join Room
 				</button>
 			</div>

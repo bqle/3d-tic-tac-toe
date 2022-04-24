@@ -5,7 +5,7 @@ import { Socket } from 'socket.io-client'
 type SocketContextType = {
 	socket: Socket | null,
 	tile: string | null,
-	joinRoom: () => void,
+	joinRoom: (room?: string) => void,
 	playMove: (i: number, j: number, k :number, tile: string) => void,
 	leaveRoom: () => void
 }

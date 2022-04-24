@@ -1,12 +1,10 @@
 enum GameStatus {
+	MENU = 'menu',
+    DRAW = 'draw',
     X = 'X',
     O = 'O',
-    EMPTY = 'EMPTY',
     
 }
 
-enum VisualStatus {
-    highlight
-}
 
-export {GameStatus, VisualStatus}
+export {GameStatus}

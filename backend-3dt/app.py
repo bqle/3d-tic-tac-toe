@@ -76,7 +76,7 @@ def on_join_room(data=None):
 		room = data['room']
 
 	sid = request.sid
-	room = 'ABCDE'
+	# room = 'ABCDE'
 	join_room(room, sid)
 
 	if (room not in rooms):

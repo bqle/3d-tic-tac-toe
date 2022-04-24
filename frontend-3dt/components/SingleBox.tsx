@@ -1,13 +1,13 @@
 import * as THREE from 'three'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, MeshProps, ThreeEvent, useFrame, Vector3, extend } from '@react-three/fiber'
-import {GameStatus} from '../enums/GameStatus'
+import {SquareStatus} from '../enums/SquareStatus'
 import SnowFlake from './Snowflake'
 import {useSpring, config, animated} from '@react-spring/three'
 
 
 type SingleBoxProps = JSX.IntrinsicElements['mesh'] & {
-  boxStatus? : GameStatus
+  boxStatus? : SquareStatus
   highlightStatus? : boolean
   updateHighlightCoord? : any
 }
@@ -20,7 +20,7 @@ const SingleBox = ({
   ...meshProps
 }:SingleBoxProps) => {
     const [hovered, setHover] = useState(false)
-    const [status, setBoxStatus] = useState(GameStatus.EMPTY)
+    const [status, setBoxStatus] = useState(SquareStatus.EMPTY)
 
     const hover = (e : ThreeEvent<PointerEvent>)=> {e.stopPropagation(); setHover(true)}
     const unhover = (e : ThreeEvent<PointerEvent>) => {e.stopPropagation(); setHover(false)}
@@ -72,7 +72,7 @@ const SingleBox = ({
                       />
         </mesh>
         {
-          boxStatus! === GameStatus.O &&
+          boxStatus! === SquareStatus.O &&
           <animated.mesh
             scale={scale}
             >
@@ -82,7 +82,7 @@ const SingleBox = ({
           </animated.mesh>
         }
         {
-          boxStatus! === GameStatus.X &&
+          boxStatus! === SquareStatus.X &&
           <animated.mesh scale={scale}><SnowFlake /></animated.mesh>
         }
       </group>
