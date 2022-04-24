@@ -27,7 +27,7 @@ const Scene = () => {
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.MENU)
 
   useEffect(() => {
-    const newSocket = io(`${window.location.hostname}:5000`, 
+    const newSocket = io(`${window.location.hostname}:5001`, 
                         {autoConnect: true, 
                         secure: true,
                         reconnection: true,
