@@ -9,7 +9,7 @@ const high = 0.3
 const color = '#955342'
 
 const SnowFlake = (meshProps:MeshProps) => {
-    const group = useRef<THREE.Mesh>(null!)
+    const snowFlakeGroup = useRef<THREE.Group>(null!)
 
 
     // useFrame(() => {group.current.rotation.x = group.current.rotation.x + 0.01;
@@ -19,13 +19,13 @@ const SnowFlake = (meshProps:MeshProps) => {
 
     useFrame(({clock}) => {
         const a = clock.getElapsedTime()
-        group.current.rotation.x = Math.sin(a)
-        group.current.rotation.y = Math.sin(a)
-        group.current.rotation.z = a
+        snowFlakeGroup.current.rotation.x = Math.sin(a)
+        snowFlakeGroup.current.rotation.y = Math.sin(a)
+        snowFlakeGroup.current.rotation.z = a
     })
     
     return (
-        <group ref={group} position={[0, 0, 0]}>
+        <group ref={snowFlakeGroup} position={[0, 0, 0]}>
             <Line
                 points={[[low, low, low], [high, high, high]]}
                 color={color}
