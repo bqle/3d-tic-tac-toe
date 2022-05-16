@@ -14,7 +14,7 @@ const shiftFactor = 1
 
 
 type LargeBoxProps = JSX.IntrinsicElements['mesh'] & {
-  cubeInfo?: Array<SquareStatus>,
+  isInRoom: null | string,
   changeGameStatus: (status: GameStatus) => void,
 }
 
@@ -22,18 +22,20 @@ type LargeBoxProps = JSX.IntrinsicElements['mesh'] & {
 function LargeBox(props: LargeBoxProps) {
   const mesh = useRef<THREE.Mesh>(null!)
   const [hovered, setHover] = useState(false)
-  const [active, setActive] = useState(false)
   const [nextTile, setNextTile] = useState(SquareStatus.X)
-  const [gameState, setGameState] = useState([[[SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
-                                                 [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
-                                                 [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY]],
-                                                [[SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
-                                                 [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
-                                                 [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY]],
-                                                [[SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
-                                                 [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
-                                                 [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY]]
-                                        ]);
+  const emptyGameState = useMemo(() => {
+                            return [[[SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
+                            [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
+                            [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY]],
+                          [[SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
+                            [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
+                            [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY]],
+                          [[SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
+                            [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY],
+                            [SquareStatus.EMPTY, SquareStatus.EMPTY, SquareStatus.EMPTY]]
+                          ]}, [])
+  const [gameState, setGameState] =useState(emptyGameState);
+  const [winner, setWinner] = useState<null | GameStatus>(null);
 
   const [highlightCoord, setHighlightCoord] = useState([0, 0, 2]);
   const {socket, tile, joinRoom, playMove, leaveRoom} = useContext(SocketContext)
@@ -206,7 +208,7 @@ function LargeBox(props: LargeBoxProps) {
     } else if (code === 'Enter') {
       console.log('ENTER!')
       let clone = cloneGameState()
-      if (clone[i][j][k] === SquareStatus.EMPTY) {
+      if (clone[i][j][k] === SquareStatus.EMPTY && winner == null) {
         console.log('EMPTY!')
         clone[i][j][k] = nextTile
         console.log(nextTile.valueOf())
@@ -222,19 +224,19 @@ function LargeBox(props: LargeBoxProps) {
           setGameState(clone)
         }
       }
-    } else if (code === 'KeyT') {
-      leaveRoom()
-    } else if (code === 'KeyC') {
-
     }
   }, [highlightCoord, gameState, nextTile, leaveRoom, playMove, cloneGameState, checkGameStatus])
 
   useEffect(() => {
     let winner = checkGameStatus()
     if (winner == GameStatus.O) {
+      setWinner(GameStatus.O)
       props.changeGameStatus(GameStatus.O)
     } else if (winner == GameStatus.X){
+      setWinner(GameStatus.X)
       props.changeGameStatus(GameStatus.X)
+    } else {
+      setWinner(null)
     }
   }, [checkGameStatus, props])
 
@@ -254,12 +256,19 @@ function LargeBox(props: LargeBoxProps) {
         let next = nextTile === SquareStatus.O ? SquareStatus.X : SquareStatus.O;
         setNextTile(next)
       }
-      
     })
   }, [gameState, nextTile, setGameState, setNextTile, socket, cloneGameState, joinRoom])
 
   useEffect(() => {
+    if (!props.isInRoom) {
+      setGameState(emptyGameState)
+      setNextTile(SquareStatus.X)
+      setWinner(null)
+      
+    }
+  }, [props.isInRoom, emptyGameState, setGameState, nextTile, setNextTile])
 
+  useEffect(() => {
     window.addEventListener('keydown', handleUserKeyPress);
     window.addEventListener('dblclick', clickCenter);
     return () => {
@@ -270,12 +279,10 @@ function LargeBox(props: LargeBoxProps) {
 
 
   function updateHighlightCoord(i : number, j: number, k: number) {
-    console.log(i, j, k);
     setHighlightCoord([i, j, k]);
   }
   
   const staticCube = new Array(3).fill(0).map(() => new Array(3).fill(0).map(() => new Array(3).fill(0)))
-
 
   return (
     <mesh rotation={[deg2rad(0), deg2rad(0), deg2rad(0)]}
@@ -311,8 +318,6 @@ function LargeBox(props: LargeBoxProps) {
             )
           )
         )}
-      
-        
     </mesh>
   )
 }

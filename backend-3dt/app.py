@@ -1,10 +1,10 @@
 from argparse import Namespace
-import engineio
-from flask import Flask, request, jsonify, render_template
-from flask_socketio import SocketIO, send, emit, join_room, leave_room, rooms
+from flask import Flask, request, render_template, jsonify
+from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 import flask_socketio
 import random
-import json
+from name_generator import NameGenerator
+
 import string
 
 app = Flask(__name__)
@@ -12,7 +12,7 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, logger=True, 
 					engineio_logger=True,
 					cors_allowed_origins='*')
-
+name_generator = NameGenerator()
 """
 {room_name: {
 		sid1: 'X',
@@ -33,12 +33,20 @@ usernames = {}
 def index():
 	return render_template('main.html')
 
+@app.route('/usernames')
+def get_usernames():
+	return jsonify(usernames)
+
+@app.route('/rooms')
+def get_rooms():
+	return jsonify(rooms)
+
 @socketio.on('connect')
 def test_connect():
 	names = usernames.values()
-	username = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 7))
+	username = name_generator.get_random_username()
 	while (username in names) :
-		username = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 7))
+		username = name_generator.get_random_username()
 
 	usernames[request.sid] = username
 	print(usernames[request.sid])
@@ -116,9 +124,8 @@ def get_room(sid):
 	else : 
 		return None	
 
-def user_leave_room(sid):
+def user_leave_room(room, sid):
 	# return bool : whether the room was deleted or not
-	room = get_room(sid)
 	if (room != None and room in rooms):
 		rooms[room].pop(sid)
 		if (len(rooms[room]) == 0):
@@ -132,11 +139,14 @@ def user_leave_room(sid):
 def on_leave_room():
 	sid = request.sid
 	room = get_room(sid)
+	print(room)
 	leave_room(room, sid)
 	if (room is not None):
-		room_deleted = user_leave_room(sid)
-		if (not room_deleted): 
+		room_deleted = user_leave_room(room, sid)
+		if (not room_deleted):
 			emit('user-left', {'roomInfo': get_room_info(room)}, room=room)
+		else:
+			print('deleted room', room)
 	
 
 @socketio.on('disconnect')

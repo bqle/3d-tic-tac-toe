@@ -11,7 +11,6 @@ import RoomMenu from '../components/Room/RoomMenu'
 import io from 'socket.io-client'
 import { Socket } from 'socket.io-client'
 import { SocketContext } from "../context/SocketContext"
-import {SquareStatus} from "../enums/SquareStatus"
 import {GameStatus} from "../enums/GameStatus"
 
 
@@ -23,6 +22,7 @@ const Scene = () => {
   const [room, setRoom] = useState<null | string>(null);
   const [roomInfo, setRoomInfo] = useState<null | {}>(null);
   const [tile, setTile] = useState<null | string>(null); // tile that this player can place
+  const [winnerName, setWinnerName] = useState<null | string>(null);
   // gameMessage options
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.MENU)
 
@@ -52,7 +52,8 @@ const Scene = () => {
 
     newSocket.on('join-response', function(message) {
       console.log('you have joined')
-      if (room === null) { // joining an empty romo
+      console.log(message)
+      if (room === null) { // joining an empty room
         setRoom(message['room'])
         setTile(message['tile'])
         setRoomInfo(message['roomInfo'])
@@ -84,12 +85,60 @@ const Scene = () => {
   }
 
   const socketLeaveRoom = () => {
+    console.log('socket leave room')
     setRoom(null)
     setTile(null)
     setRoomInfo(null)
+    setGameStatus(GameStatus.MENU)
+    setWinnerName(null)
     socket?.emit('leave-room')
   }
 
+  let gameStatusDescription = null;
+  if (gameStatus == GameStatus.MENU || gameStatus == GameStatus.DRAW) {
+    console.log(gameStatus)
+    console.log(winnerName)
+    switch(gameStatus) {
+      case GameStatus.MENU: 
+        gameStatusDescription = 
+            <group>
+              <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+                position={[0, 5, 0]}
+                fontSize={2} >
+                  Welcome to
+              </Text>
+              <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+                position={[0, 3, 0]}
+                fontSize={2} >
+                  3D tic-tac-toe!
+              </Text>
+            </group>
+            break;
+      case GameStatus.DRAW: 
+        gameStatusDescription = <group>
+          <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+            position={[0, 5, 0]}
+            fontSize={2} >
+              Game is drawn!
+          </Text>
+        </group>
+        break;
+    }
+  } else {
+    console.log('a player has won')
+    console.log(gameStatus)
+    console.log(winnerName)
+    gameStatusDescription = <group>
+            <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
+              position={[0, 5, 0]}
+              fontSize={2} >
+                {winnerName} has won
+            </Text>
+          </group>
+  }
+    
+      
+    
   return (
     <div>
       <HelpMenu />
@@ -110,7 +159,7 @@ const Scene = () => {
               }}
       >
         <color attach="background" args={["black"]}></color>
-        {gameStatus == GameStatus.MENU &&
+        {/* {gameStatus == GameStatus.MENU &&
           <group>
             <Text font={fonts.Philosopher} color={colors.brightOrange} anchorX='center' anchorY='middle'
               position={[0, 5, 0]}
@@ -153,6 +202,9 @@ const Scene = () => {
                 Game is drawn!
             </Text>
           </group>
+        } */}
+        {
+          gameStatusDescription
         }
         <OrbitControls target={[0, 0, 0]} />
         {/* <Stars radius={100} depth={1} count={5000} factor={4} saturation={0}
@@ -174,10 +226,34 @@ const Scene = () => {
         <SocketContext.Provider value={{
           socket: socket,
           tile: tile,
-          joinRoom: socketJoinRoom, 
+          joinRoom: socketJoinRoom,
           playMove: socketPlayMove,
           leaveRoom: socketLeaveRoom}}>
-          <LargeBox changeGameStatus={(status: GameStatus) => {setGameStatus(status);}}/>
+          <LargeBox isInRoom={room} changeGameStatus={(status: GameStatus) => {
+            let winner = ''
+            if (roomInfo != null) {
+              if (status == GameStatus.X) {
+                for (const [entry, value] of Object.entries(roomInfo)) {
+                  if (value == 'X') {
+                    winner = entry;
+                  }
+                }
+              } else if (status == GameStatus.O) {
+                for (const [entry, value] of Object.entries(roomInfo)) {
+                  if (value == 'O') {
+                    winner = entry;
+                  }
+                }
+              }
+            }
+            if (status == GameStatus.DRAW) {
+              setGameStatus(GameStatus.DRAW);
+            } else if (winner != '') {
+              setGameStatus(status);
+              setWinnerName(winner);
+            }
+          }}
+          />
         </SocketContext.Provider>
       </Canvas>
     </div>

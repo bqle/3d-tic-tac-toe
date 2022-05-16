@@ -60,7 +60,7 @@ const RoomMenu = (props: RoomMenuProps) => {
 				</div>
 				<input type='text' name='room-name' className='input-room'
 					onInput={(e) => {
-						setRoomInput((e.target as HTMLTextAreaElement).value);
+						setRoomInput((e.target as HTMLTextAreaElement).value.toUpperCase());
 					}}
 					placeholder={"Room code..."}
 				/>

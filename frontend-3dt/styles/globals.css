@@ -85,11 +85,12 @@ a {
   position:relative;
   background: transparent;
   border-color: #F5F5DC;
-
+  text-transform: uppercase;
 }
 
 .input-room::placeholder {
   color: #fbfbe2;
+  text-transform: none;
 }
 
 .input-room:focus {
@@ -107,3 +108,5 @@ textarea:focus, input:focus {
 .menu-p {
   color: #F5F5DC
 }
+
+

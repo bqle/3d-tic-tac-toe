@@ -22,9 +22,6 @@ const SingleBox = ({
     const [hovered, setHover] = useState(false)
     const [status, setBoxStatus] = useState(SquareStatus.EMPTY)
 
-    const hover = (e : ThreeEvent<PointerEvent>)=> {e.stopPropagation(); setHover(true)}
-    const unhover = (e : ThreeEvent<PointerEvent>) => {e.stopPropagation(); setHover(false)}
-
     const {scale} = useSpring({
       scale: hovered ? 1 : 0,
       config: config.wobbly,
@@ -37,10 +34,12 @@ const SingleBox = ({
     }
 
     useMemo(() => {
-      if (boxStatus != status) {
+      if (boxStatus != SquareStatus.EMPTY) {
         setHover(true)
+      } else {
+        setHover(false)
       }
-    }, [boxStatus, status])
+    }, [boxStatus])
 
     useEffect(() => {
       const handleEnter = (e: KeyboardEvent) => {
